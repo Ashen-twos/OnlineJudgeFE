@@ -28,11 +28,14 @@
     </panel>
     <Announcements class="announcement"></Announcements>
     </Col>
+    <TestCaseList :movieList="movieList"></TestCaseList>
   </Row>
+
 </template>
 
 <script>
   import Announcements from './Announcements.vue'
+  import TestCaseList from '../../components/TestCaseList.vue'
   import api from '@oj/api'
   import time from '@/utils/time'
   import { CONTEST_STATUS } from '@/utils/constants'
@@ -40,12 +43,30 @@
   export default {
     name: 'home',
     components: {
-      Announcements
+      Announcements,
+      TestCaseList
     },
     data () {
       return {
         contests: [],
-        index: 0
+        index: 0,
+        movieList: [
+          {
+            name: '测试点1',
+            url: 'https://movie.douban.com/subject/1292052/',
+            pass: true
+          },
+          {
+            name: '测试点2',
+            url: 'https://movie.douban.com/subject/1295644/',
+            pass: false
+          },
+          {
+            name: '测试点3',
+            url: 'https://movie.douban.com/subject/1291546/',
+            pass: true
+          }
+        ]
       }
     },
     mounted () {
