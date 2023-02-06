@@ -23,6 +23,10 @@
     </Col>
 
     <Col :span="20">
+      <TestCaseList :testCases="submission.test_case"/>
+    </Col>
+
+    <Col :span="20">
       <Highlight :code="submission.code" :language="submission.language" :border-color="status.color"></Highlight>
     </Col>
     <Col v-if="submission.can_unshare" :span="20">
@@ -46,11 +50,13 @@
   import {JUDGE_STATUS} from '@/utils/constants'
   import utils from '@/utils/utils'
   import Highlight from '@/pages/oj/components/Highlight'
+  import TestCaseList from '@/pages/oj/components/TestCaseList'
 
   export default {
     name: 'submissionDetails',
     components: {
-      Highlight
+      Highlight,
+      TestCaseList
     },
     data () {
       return {
@@ -95,7 +101,14 @@
           statistic_info: {
             time_cost: '',
             memory_cost: ''
-          }
+          },
+          test_case: [
+            {
+              name: '',
+              url: '',
+              pass: false
+            }
+          ]
         },
         isConcat: false,
         loading: false
@@ -141,7 +154,10 @@
               this.columns = this.columns.concat(adminColumn)
             }
           }
+          /* var test = JSON.parse(data.test_case)
+          console.log(test) */
           this.submission = data
+          // console.log('type:', this.submission.test_case[0])
         }, () => {
           this.loading = false
         })

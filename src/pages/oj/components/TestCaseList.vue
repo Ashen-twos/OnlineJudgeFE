@@ -4,13 +4,8 @@
           <Icon type="information-circled"></Icon>
             测试点详情
         </template>
-        <template #extra>
-            <a href="#">
-                <Icon type="ios-loop-strong"></Icon>
-                刷新
-            </a>
-        </template>
-        <p class="rate-demo" v-for="item in movieList">
+        <Spin fix v-show="!isDone"></Spin>
+        <p class="rate-demo" v-for="item in caseList">
             <a :href="item.url" target="_blank">{{ item.name }}</a>
             <span>
               <Icon type="checkmark" color="green" v-if="item.pass"></Icon>
@@ -22,7 +17,25 @@
 <script>
   export default {
     name: 'TestCaseVue',
-    props: ['movieList']
+    props: ['testCases'],
+    data () {
+      return {
+        caseList: [],
+        isDone: false
+      }
+    },
+    mounted () {
+      console.log(this.caseList)
+    },
+    watch: {
+      testCases (curVal, oldVal) {
+        if (curVal) {
+          console.log('List Get:', curVal)
+          this.caseList = curVal
+          this.isDone = true
+        }
+      }
+    }
   }
 </script>
 
@@ -31,5 +44,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;   
+    line-height: 40px;
 }
+
 </style>
