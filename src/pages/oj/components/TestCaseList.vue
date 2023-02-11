@@ -2,26 +2,30 @@
     <Card style="width:100%">
         <template #title>
           <Icon type="information-circled"></Icon>
-            测试点详情
+            {{name}}
         </template>
         <Spin fix v-show="!isDone"></Spin>
-        <p class="rate-demo" v-for="item in caseList">
+        <!-- <p class="rate-demo" v-for="item in caseList">
             <a :href="item.url" target="_blank">{{ item.name }}</a>
             <span>
               <Icon type="checkmark" color="green" v-if="item.pass"></Icon>
               <Icon type="close" color="red" v-else></Icon>
             </span>
-        </p>
-    </Card>
+        </p> -->
+        <Col>
+          <Table stripe :columns="columns" :disabled-hover="true" :data="testCases"></Table>
+        </Col>
+    </Card> 
 </template>
+
 <script>
   export default {
     name: 'TestCaseVue',
-    props: ['testCases'],
+    props: ['testCases', 'columns', 'name'],
     data () {
       return {
         caseList: [],
-        isDone: false
+        isDone: true
       }
     },
     mounted () {
@@ -40,11 +44,5 @@
 </script>
 
 <style>
-.rate-demo {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;   
-    line-height: 40px;
-}
 
 </style>

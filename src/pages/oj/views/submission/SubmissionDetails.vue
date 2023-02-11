@@ -18,12 +18,16 @@
     </Col>
 
     <!--后台返info就显示出来， 权限控制放后台 -->
-    <Col v-if="submission.info && !isCE" :span="20">
+    <!-- <Col v-if="submission.info && !isCE" :span="20">
       <Table stripe :loading="loading" :disabled-hover="true" :columns="columns" :data="submission.info.data"></Table>
+    </Col> -->
+
+    <Col v-if="submission.info && !isCE" :span="20">
+      <TestCaseList :testCases="submission.info.data.base | []" :columns="baseColumns" name="基准测试"/>
     </Col>
 
-    <Col :span="20">
-      <TestCaseList :testCases="submission.test_case"/>
+    <Col v-if="submission.info && !isCE" :span="20">
+      <TestCaseList :testCases="submission.info.data.extra | []" :columns="extraColumns" name="附加测试"/>
     </Col>
 
     <Col :span="20">
@@ -92,23 +96,97 @@
             }
           }
         ],
+        baseColumns: [
+          {
+            title: this.$i18n.t('m.ID'),
+            align: 'center',
+            type: 'index'
+          },
+          {
+            title: this.$i18n.t('m.Status'),
+            align: 'center',
+            render: (h, params) => {
+              return h('Tag', {
+                props: {
+                  color: JUDGE_STATUS[params.row.result].color
+                }
+              }, this.$i18n.t('m.' + JUDGE_STATUS[params.row.result].name.replace(/ /g, '_')))
+            }
+          },
+          {
+            title: this.$i18n.t('m.Memory'),
+            align: 'center',
+            render: (h, params) => {
+              return h('span', utils.submissionMemoryFormat(params.row.memory))
+            }
+          },
+          {
+            title: this.$i18n.t('m.Time'),
+            align: 'center',
+            render: (h, params) => {
+              return h('span', utils.submissionTimeFormat(params.row.cpu_time))
+            }
+          },
+          {
+            title: '得分',
+            align: 'center',
+            render: (h, params) => {
+              return h('span', params.row.score)
+            }
+          }
+        ],
+        extraColumns: [
+          {
+            title: this.$i18n.t('m.ID'),
+            align: 'center',
+            type: 'index'
+          },
+          {
+            title: this.$i18n.t('m.Status'),
+            align: 'center',
+            render: (h, params) => {
+              return h('Tag', {
+                props: {
+                  color: JUDGE_STATUS[params.row.result].color
+                }
+              }, this.$i18n.t('m.' + JUDGE_STATUS[params.row.result].name.replace(/ /g, '_')))
+            }
+          },
+          {
+            title: '项目名称',
+            align: 'center',
+            render: (h, params) => {
+              return h('span', params.row.name)
+            }
+          },
+          {
+            title: '描述',
+            align: 'center',
+            render: (h, params) => {
+              return h('span', params.row.info)
+            }
+          },
+          {
+            title: '得分',
+            align: 'center',
+            render: (h, params) => {
+              return h('span', params.row.score)
+            }
+          }
+        ],
         submission: {
           result: '0',
           code: '',
           info: {
-            data: []
+            data: {
+              base: [],
+              extra: []
+            }
           },
           statistic_info: {
             time_cost: '',
             memory_cost: ''
-          },
-          test_case: [
-            {
-              name: '',
-              url: '',
-              pass: false
-            }
-          ]
+          }
         },
         isConcat: false,
         loading: false
@@ -125,7 +203,7 @@
           let data = res.data.data
           if (data.info && data.info.data && !this.isConcat) {
             // score exist means the submission is OI problem submission
-            if (data.info.data[0].score !== undefined) {
+            if (data.info.data.base[0].score !== undefined) {
               this.isConcat = true
               const scoreColumn = {
                 title: this.$i18n.t('m.Score'),
@@ -153,6 +231,15 @@
               ]
               this.columns = this.columns.concat(adminColumn)
             }
+          }
+          if (data.info.data === undefined) {
+            data.info.data = {}
+          }
+          if (data.info.data.base === undefined) {
+            data.info.data.base = []
+          }
+          if (data.info.data.extra === undefined) {
+            data.info.data.extra = []
           }
           /* var test = JSON.parse(data.test_case)
           console.log(test) */

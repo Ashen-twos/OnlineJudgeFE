@@ -50,6 +50,7 @@
       </Panel>
       <!--problem main end-->
       <Card :padding="20" id="submit-code" dis-hover>
+        <!-- 代码编辑器 -->
         <CodeMirror :value.sync="code"
                     :languages="problem.languages"
                     :language="language"
@@ -58,6 +59,7 @@
                     @changeTheme="onChangeTheme"
                     @changeLang="onChangeLang"></CodeMirror>
         <Row type="flex" justify="space-between">
+          <!-- 提交状态 -->
           <Col :span="10">
             <div class="status" v-if="statusVisible">
               <template v-if="!this.contestID || (this.contestID && OIContestRealTimePermission)">
@@ -82,6 +84,7 @@
           </Col>
 
           <Col :span="12">
+            <!-- 验证码 -->
             <template v-if="captchaRequired">
               <div class="captcha-container">
                 <Tooltip v-if="captchaRequired" content="Click to refresh" placement="top">
@@ -90,6 +93,11 @@
                 <Input v-model="captchaCode" class="captcha-code"/>
               </div>
             </template>
+
+            <!-- 完全测试开关 -->
+            <i-switch v-model="switch1" @on-change="changeFull"></i-switch>
+
+            <!-- 提交按钮 -->
             <Button type="warning" icon="edit" :loading="submitting" @click="submitCode"
                     :disabled="problemSubmitDisabled || submitted"
                     class="fl-right">
@@ -100,8 +108,9 @@
         </Row>
       </Card>
     </div>
-
+    <!-- 右侧 -->
     <div id="right-column">
+      <!-- 右侧导航栏 -->
       <VerticalMenu @on-click="handleRoute">
         <template v-if="this.contestID">
           <VerticalMenu-item :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
@@ -132,7 +141,7 @@
           </VerticalMenu-item>
         </template>
       </VerticalMenu>
-
+      <!-- 题目信息 -->
       <Card id="info">
         <div slot="title" class="header">
           <Icon type="information-circled"></Icon>
@@ -174,7 +183,7 @@
           </li>
         </ul>
       </Card>
-
+      <!-- 统计 -->
       <Card id="pieChart" :padding="0" v-if="!this.contestID || OIContestRealTimePermission">
         <div slot="title">
           <Icon type="ios-analytics"></Icon>
@@ -186,7 +195,7 @@
         </div>
       </Card>
     </div>
-
+    <!-- 对话框 -->
     <Modal v-model="graphVisible">
       <div id="pieChart-detail">
         <ECharts :options="largePie" :initOptions="largePieInitOpts"></ECharts>
@@ -219,6 +228,7 @@
     mixins: [FormMixin],
     data () {
       return {
+        fullJudge: false,
         statusVisible: false,
         captchaRequired: false,
         graphVisible: false,
@@ -408,8 +418,10 @@
           problem_id: this.problem.id,
           language: this.language,
           code: this.code,
-          contest_id: this.contestID
+          contest_id: this.contestID,
+          extra_option: this.fullJudge
         }
+        console.log(data)
         if (this.captchaRequired) {
           data.captcha = this.captchaCode
         }
@@ -466,6 +478,9 @@
       },
       onCopyError (e) {
         this.$error('Failed to copy code')
+      },
+      changeFull () {
+        this.fullJudge = !this.fullJudge
       }
     },
     computed: {

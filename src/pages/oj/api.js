@@ -284,6 +284,7 @@ function ajax (url, method, options) {
   } else {
     params = data = {}
   }
+  console.log('ajax: ', data)
   return new Promise((resolve, reject) => {
     axios({
       url,
