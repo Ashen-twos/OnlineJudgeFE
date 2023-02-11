@@ -94,9 +94,6 @@
               </div>
             </template>
 
-            <!-- 完全测试开关 -->
-            <i-switch v-model="switch1" @on-change="changeFull"></i-switch>
-
             <!-- 提交按钮 -->
             <Button type="warning" icon="edit" :loading="submitting" @click="submitCode"
                     :disabled="problemSubmitDisabled || submitted"
@@ -104,6 +101,13 @@
               <span v-if="submitting">{{$t('m.Submitting')}}</span>
               <span v-else>{{$t('m.Submit')}}</span>
             </Button>
+
+            <!-- 完全测试开关 -->
+            <i-switch v-model="fullJudge" class="fl-right-switch" size="large">
+              <span slot="open">full</span>
+              <span slot="close">base</span>
+            </i-switch>
+
           </Col>
         </Row>
       </Card>
@@ -228,7 +232,7 @@
     mixins: [FormMixin],
     data () {
       return {
-        fullJudge: false,
+        fullJudge: true,
         statusVisible: false,
         captchaRequired: false,
         graphVisible: false,
@@ -478,9 +482,6 @@
       },
       onCopyError (e) {
         this.$error('Failed to copy code')
-      },
-      changeFull () {
-        this.fullJudge = !this.fullJudge
       }
     },
     computed: {
@@ -618,6 +619,15 @@
 
   .fl-right {
     float: right;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .fl-right-switch {
+    float: right;
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
   }
 
   #pieChart {
