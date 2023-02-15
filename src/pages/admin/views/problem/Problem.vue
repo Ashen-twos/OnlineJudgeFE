@@ -185,6 +185,88 @@
             <code-mirror v-model="problem.spj_code" :mode="spjMode"></code-mirror>
           </Accordion>
         </el-form-item>
+
+        <!-- 附加测试 -->
+        <el-form-item :label="$t('m.Extra_Judge')">
+          <el-col :span="24">
+            <el-checkbox v-model="problem.extra" @click.native.prevent="switchEx()">{{$t('m.Use_Extra_Judge')}}</el-checkbox>
+          </el-col>
+        </el-form-item>
+
+        <el-form-item v-if="problem.extra">
+          <el-tabs v-model="activeName" type="card">
+            <el-tab-pane label="代码格式" name="first">
+              <el-row :span="24" :gutter="80">
+                <el-col :span="4">
+                  <el-form-item label="是否启用">
+                    <el-switch v-model="problem.extra_config.format.enable"></el-switch>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <el-form-item label="分值" required>
+                    <el-input type="Number" placeholder="5" v-model="problem.extra_score.format"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <el-form-item label="缩进长度" required>
+                    <el-input type="Number" placeholder="4" v-model="problem.extra_config.format.indent_size"></el-input>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="4">
+                  <el-form-item label="大括号位置" required>
+                    <el-select v-model="problem.extra_config.format.left_big_para">
+                      <el-option label="行首" :value="true"></el-option>
+                      <el-option label="行末" :value="false"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-tab-pane>
+
+            <el-tab-pane label="函数使用" name="second">
+              <el-row :span="24" :gutter="80">
+                <el-col :span="4">
+                    <el-form-item label="是否启用">
+                      <el-switch v-model="problem.extra_config.function.enable"></el-switch>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                    <el-form-item label="分值" required>
+                      <el-input type="Number" placeholder="5" v-model="problem.extra_score.function"></el-input>
+                    </el-form-item>
+                  </el-col>
+                <el-col :span="16">
+                  <el-form-item label="函数列表">
+                    <span class="tags">
+                      <el-tag
+                        v-for="tag in problem.extra_config.function.function_list"
+                        :closable="true"
+                        :close-transition="false"
+                        :key="tag"
+                        type="success"
+                        @close="closeFunc(tag)"
+                      >{{tag}}</el-tag>
+                    </span>
+                    <el-autocomplete
+                      v-if="inputVisible"
+                      size="mini"
+                      class="input-new-tag"
+                      popper-class="problem-tag-poper"
+                      v-model="funcInput"
+                      :trigger-on-focus="false"
+                      @keyup.enter.native="addFunc"
+                      @select="addFunc"
+                      :fetch-suggestions="querySearch">
+                    </el-autocomplete>
+                    <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ 新增函数</el-button>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-tab-pane>
+          </el-tabs>
+        </el-form-item>
+
         <el-row :gutter="20">
           <el-col :span="4">
             <el-form-item :label="$t('m.Type')">
@@ -247,8 +329,7 @@
                   <el-input
                     size="small"
                     :placeholder="$t('m.Score')"
-                    v-model="scope.row.score"
-                    :disabled="problem.rule_type !== 'OI'">
+                    v-model="scope.row.score">
                   </el-input>
                 </template>
               </el-table-column>
@@ -280,6 +361,7 @@
     },
     data () {
       return {
+        activeName: 'first',
         rules: {
           _id: {required: true, message: 'Display ID is required', trigger: 'blur'},
           title: {required: true, message: 'Title is required', trigger: 'blur'},
@@ -290,6 +372,7 @@
         mode: '',
         contest: {},
         problem: {
+          extra: false,
           languages: [],
           io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'}
         },
@@ -301,6 +384,7 @@
         allLanguage: {},
         inputVisible: false,
         tagInput: '',
+        funcInput: '',
         template: {},
         title: '',
         spjMode: '',
@@ -338,6 +422,7 @@
           template: {},
           samples: [{input: '', output: ''}],
           spj: false,
+          extra: false,
           spj_language: '',
           spj_code: '',
           spj_compile_ok: false,
@@ -346,7 +431,22 @@
           rule_type: 'ACM',
           hint: '',
           source: '',
-          io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'}
+          io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'},
+          extra_config: {
+            format: {
+              enable: false,
+              indent_size: 4,
+              left_big_para: true
+            },
+            function: {
+              enable: false,
+              function_list: []
+            }
+          },
+          extra_score: {
+            format: 5,
+            function: 5
+          }
         }
         let contestID = this.$route.params.contestId
         if (contestID) {
@@ -431,6 +531,10 @@
           this.problem.spj = !this.problem.spj
         }
       },
+      switchEx () {
+        this.problem.extra = !this.problem.extra
+        console.log(this.problem.extra_config)
+      },
       querySearch (queryString, cb) {
         api.getProblemTagList({ keyword: queryString }).then(res => {
           let tagList = []
@@ -454,8 +558,19 @@
         this.inputVisible = false
         this.tagInput = ''
       },
+      addFunc () {
+        let inputValue = this.funcInput
+        if (inputValue) {
+          this.problem.extra_config.function.function_list.push(inputValue)
+        }
+        this.inputVisible = false
+        this.funcInput = ''
+      },
       closeTag (tag) {
         this.problem.tags.splice(this.problem.tags.indexOf(tag), 1)
+      },
+      closeFunc (tag) {
+        this.problem.extra_config.function.function_list.splice(this.problem.extra_config.function.function_list.indexOf(tag), 1)
       },
       addSample () {
         this.problem.samples.push({input: '', output: ''})
@@ -575,6 +690,7 @@
         if (funcName === 'editContestProblem') {
           this.problem.contest_id = this.contest.id
         }
+        console.log(this.problem)
         api[funcName](this.problem).then(res => {
           if (this.routeName === 'create-contest-problem' || this.routeName === 'edit-contest-problem') {
             this.$router.push({name: 'contest-problem-list', params: {contestId: this.$route.params.contestId}})
