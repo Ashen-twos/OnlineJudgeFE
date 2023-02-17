@@ -192,9 +192,8 @@
             <el-checkbox v-model="problem.extra" @click.native.prevent="switchEx()">{{$t('m.Use_Extra_Judge')}}</el-checkbox>
           </el-col>
         </el-form-item>
-
         <el-form-item v-if="problem.extra">
-          <el-tabs v-model="activeName" type="card">
+          <el-tabs v-model="activeName" type="border-card">
             <el-tab-pane label="代码格式" name="first">
               <el-row :span="24" :gutter="80">
                 <el-col :span="4">
@@ -267,75 +266,144 @@
           </el-tabs>
         </el-form-item>
 
-        <el-row :gutter="20">
-          <el-col :span="4">
-            <el-form-item :label="$t('m.Type')">
-              <el-radio-group v-model="problem.rule_type" :disabled="disableRuleType">
-                <el-radio label="ACM">ACM</el-radio>
-                <el-radio label="OI">OI</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item :label="$t('m.TestCase')" :error="error.testcase">
-              <el-upload
-                action="/api/admin/test_case"
-                name="file"
-                :data="{spj: problem.spj}"
-                :show-file-list="true"
-                :on-success="uploadSucceeded"
-                :on-error="uploadFailed">
-                <el-button size="small" type="primary" icon="el-icon-fa-upload">Choose File</el-button>
-              </el-upload>
-            </el-form-item>
-          </el-col>
+        <el-tabs value="first" type="border-card">
+          <el-tab-pane label="测试选项" name="first">
+            <el-row>
+              <el-col :span="12">
+                <el-form-item :label="$t('m.Type')">
+                  <el-radio-group v-model="problem.test_mode" :disabled="disableRuleType">
+                    <el-radio :label="0">完全模式</el-radio>
+                    <el-radio :label="1">函数模式</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col> 
+            </el-row>
 
-          <el-col :span="6">
-            <el-form-item :label="$t('m.IOMode')">
-              <el-radio-group v-model="problem.io_mode.io_mode">
-                <el-radio label="Standard IO">Standard IO</el-radio>
-                <el-radio label="File IO">File IO</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
+            <el-form-item v-if="problem.test_mode===1">
+              <el-row :gutter="80">
+                <el-col :span="8">
+                  <el-form-item label="函数名称" required>
+                    <el-input type="text" placeholder="请输入函数名称" v-model="problem.func_config.name"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="返回值类型" required>
+                    <el-select v-model="problem.func_config.return_type" placeholder="请选择">
+                      <el-option v-for="item in dataType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="参数选项" required>
+                      <el-button type="primary" @click="dialogFormVisible = true">添加参数</el-button>                   
+                  </el-form-item>
+                </el-col>
+              </el-row>
 
-          <el-col :span="4" v-if="problem.io_mode.io_mode == 'File IO'">
-            <el-form-item :label="$t('m.InputFileName')" required>
-              <el-input type="text" v-model="problem.io_mode.input"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="4" v-if="problem.io_mode.io_mode == 'File IO'">
-            <el-form-item :label="$t('m.OutputFileName')" required>
-              <el-input type="text" v-model="problem.io_mode.output"></el-input>
-            </el-form-item>
-          </el-col>
+              <el-dialog title="添加参数" :visible.sync="dialogFormVisible">
+                <el-row>
+                  <el-form :model="form">
+                    <el-row>
+                      <el-form-item label="参数名称" required>
+                        <el-input v-model="parameterConfig.name" required></el-input>
+                      </el-form-item>
+                    </el-row>
+                    <el-row>
+                      <el-form-item label="参数类型" required>
+                        <el-row :gutter="50">
+                          <el-col :span="12">
+                            <el-select v-model="parameterConfig.type" placeholder="请选择参数类型">
+                              <el-option v-for="item in dataType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                            </el-select>
+                          </el-col>
+                          <el-col :span="4">
+                            <el-checkbox v-model="parameterConfig.ptr">指针</el-checkbox>
+                          </el-col>
+                          <el-col :span="4">
+                            <el-checkbox v-model="parameterConfig.arr">数组</el-checkbox>
+                          </el-col>
+                        </el-row>
+                      </el-form-item>
+                    </el-row>
+                  </el-form>
+                </el-row>
+                <div slot="footer" class="dialog-footer">
+                  <el-button @click="dialogFormVisible = false">取 消</el-button>
+                  <el-button type="primary" @click="addParameter">确 定</el-button>
+                </div>
+              </el-dialog>
 
-          <el-col :span="24">
-            <el-table
-              :data="problem.test_case_score"
-              style="width: 100%">
-              <el-table-column
-                prop="input_name"
-                :label="$t('m.Input')">
-              </el-table-column>
-              <el-table-column
-                prop="output_name"
-                :label="$t('m.Output')">
-              </el-table-column>
-              <el-table-column
-                prop="score"
-                :label="$t('m.Score')">
-                <template slot-scope="scope">
-                  <el-input
-                    size="small"
-                    :placeholder="$t('m.Score')"
-                    v-model="scope.row.score">
-                  </el-input>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-col>
-        </el-row>
+              <el-row>
+                <el-table :data="problem.func_config.parameter">
+                  <el-table-column prop="name" label="参数名称"></el-table-column>
+                  <el-table-column prop="type" label="参数类型"></el-table-column>
+                  <el-table-column prop="arr" label="数组" :formatter="boolFormatter"></el-table-column>
+                  <el-table-column prop="ptr" label="指针" :formatter="boolFormatter"></el-table-column>
+                  <el-table-column fixed="right" label="操作">
+                    <template slot-scope="scope">
+                      <el-button size="small" @click="editParameter(scope.row)">编辑</el-button>
+                      <el-button size="small" @click="deleteParameter(scope.row.id)">删除</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-row>
+
+            </el-form-item>
+            
+            <el-row>
+              <el-form-item v-if="problem.test_mode===1">
+                <Accordion title="初始化代码">
+                  <code-mirror v-model="problem.func_config.init"></code-mirror>
+                </Accordion>
+              </el-form-item>
+            </el-row>
+          </el-tab-pane>
+
+          <el-tab-pane label="测试用例" name="second">
+            <el-row>
+              <el-col :span="6">
+                <el-form-item :label="$t('m.TestCase')" :error="error.testcase">
+                  <el-upload
+                    action="/api/admin/test_case"
+                    name="file"
+                    :data="{spj: problem.spj}"
+                    :show-file-list="true"
+                    :on-success="uploadSucceeded"
+                    :on-error="uploadFailed">
+                    <el-button size="small" type="primary" icon="el-icon-fa-upload">Choose File</el-button>
+                  </el-upload>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24">
+                <el-table
+                  :data="problem.test_case_score"
+                  style="width: 100%">
+                  <el-table-column
+                    prop="input_name"
+                    :label="$t('m.Input')">
+                  </el-table-column>
+                  <el-table-column
+                    prop="output_name"
+                    :label="$t('m.Output')">
+                  </el-table-column>
+                  <el-table-column
+                    prop="score"
+                    :label="$t('m.Score')">
+                    <template slot-scope="scope">
+                      <el-input
+                        size="small"
+                        :placeholder="$t('m.Score')"
+                        v-model="scope.row.score">
+                      </el-input>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-col>
+            </el-row>
+          </el-tab-pane>
+        </el-tabs>
 
         <el-form-item :label="$t('m.Source')">
           <el-input :placeholder="$t('m.Source')" v-model="problem.source"></el-input>
@@ -361,6 +429,41 @@
     },
     data () {
       return {
+        dataType: [
+          {
+            value: 'void',
+            label: 'void'
+          },
+          {
+            value: 'int',
+            label: 'int'
+          },
+          {
+            value: 'short',
+            label: 'short'
+          },
+          {
+            value: 'float',
+            label: 'float'
+          },
+          {
+            value: 'double',
+            label: 'double'
+          },
+          {
+            value: 'char',
+            label: 'char'
+          }
+        ],
+        dialogFormVisible: false,
+        nextID: 1,
+        parameterConfig: {
+          id: 1,
+          name: '',
+          type: '',
+          arr: false,
+          ptr: false
+        },
         activeName: 'first',
         rules: {
           _id: {required: true, message: 'Display ID is required', trigger: 'blur'},
@@ -374,7 +477,13 @@
         problem: {
           extra: false,
           languages: [],
-          io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'}
+          io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'},
+          func_config: {
+            name: '',
+            parameter: [],
+            init: '',
+            return_type: ''
+          }
         },
         reProblem: {
           languages: [],
@@ -446,6 +555,13 @@
           extra_score: {
             format: 5,
             function: 5
+          },
+          test_mode: 0,
+          func_config: {
+            name: '',
+            parameter: [],
+            init: '',
+            return_type: ''
           }
         }
         let contestID = this.$route.params.contestId
@@ -516,6 +632,41 @@
       }
     },
     methods: {
+      boolFormatter (row, column, cellValue) {
+        return String(cellValue)
+      },
+      deleteParameter (id) {
+        var index = this.problem.func_config.parameter.findIndex(item => {
+          if (item.id === id) {
+            return true
+          }
+        })
+        console.log(index)
+        this.problem.func_config.parameter.splice(index, 1)
+      },
+      addParameter () {
+        let index = this.problem.func_config.parameter.findIndex(item => {
+          if (item.name === this.parameterConfig.name) {
+            return true
+          }
+        })
+        if (index !== -1) {
+          this.$message.error('参数名已存在')
+          return
+        }
+        this.problem.func_config.parameter.push({
+          id: this.nextID++,
+          name: this.parameterConfig.name,
+          type: this.parameterConfig.type,
+          arr: this.parameterConfig.arr,
+          ptr: this.parameterConfig.ptr
+        })
+        this.parameterConfig.name = ''
+        this.parameterConfig.type = ''
+        this.parameterConfig.arr = false
+        this.parameterConfig.ptr = false
+        this.dialogFormVisible = false
+      },
       switchSpj () {
         if (this.testCaseUploaded) {
           this.$confirm('If you change problem judge method, you need to re-upload test cases', 'Warning', {
@@ -533,7 +684,7 @@
       },
       switchEx () {
         this.problem.extra = !this.problem.extra
-        console.log(this.problem.extra_config)
+        console.log(this.problem)
       },
       querySearch (queryString, cb) {
         api.getProblemTagList({ keyword: queryString }).then(res => {
