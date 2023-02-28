@@ -296,6 +296,11 @@ export default {
     return ajax('export_problem', 'post', {
       data
     })
+  },
+  createJudgeCode (data) {
+    return ajax('admin/create_judge_code', 'post', {
+      data
+    })
   }
 }
 

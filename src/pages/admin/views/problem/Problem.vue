@@ -271,24 +271,25 @@
             <el-row>
               <el-col :span="12">
                 <el-form-item :label="$t('m.Type')">
-                  <el-radio-group v-model="problem.test_mode" :disabled="disableRuleType">
+                  <el-radio-group v-model="problem.judge_config.judge_mode" :disabled="disableRuleType">
                     <el-radio :label="0">完全模式</el-radio>
                     <el-radio :label="1">函数模式</el-radio>
+                    <el-radio :label="2">语句模式</el-radio>
                   </el-radio-group>
                 </el-form-item>
               </el-col> 
             </el-row>
 
-            <el-form-item v-if="problem.test_mode===1">
+            <el-form-item v-if="problem.judge_config.judge_mode===1">
               <el-row :gutter="80">
                 <el-col :span="8">
                   <el-form-item label="函数名称" required>
-                    <el-input type="text" placeholder="请输入函数名称" v-model="problem.func_config.name"></el-input>
+                    <el-input type="text" placeholder="请输入函数名称" v-model="problem.judge_config.func_config.name"></el-input>
                   </el-form-item>
                 </el-col>
                 <el-col :span="8">
                   <el-form-item label="返回值类型" required>
-                    <el-select v-model="problem.func_config.return_type" placeholder="请选择">
+                    <el-select v-model="problem.judge_config.func_config.return_type" placeholder="请选择">
                       <el-option v-for="item in dataType" :key="item.value" :label="item.label" :value="item.value"></el-option>
                     </el-select>
                   </el-form-item>
@@ -333,30 +334,139 @@
                 </div>
               </el-dialog>
 
+              <el-dialog title="编辑参数" :visible.sync="dialogEditVisible">
+                <el-row>
+                  <el-form :model="form">
+                    <el-row>
+                      <el-form-item label="参数名称" required>
+                        <el-input v-model="parameterConfig.name" required></el-input>
+                      </el-form-item>
+                    </el-row>
+                    <el-row>
+                      <el-form-item label="参数类型" required>
+                        <el-row :gutter="50">
+                          <el-col :span="12">
+                            <el-select v-model="parameterConfig.type" placeholder="请选择参数类型">
+                              <el-option v-for="item in dataType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                            </el-select>
+                          </el-col>
+                          <el-col :span="4">
+                            <el-checkbox v-model="parameterConfig.ptr">指针</el-checkbox>
+                          </el-col>
+                          <el-col :span="4">
+                            <el-checkbox v-model="parameterConfig.arr">数组</el-checkbox>
+                          </el-col>
+                        </el-row>
+                      </el-form-item>
+                    </el-row>
+                  </el-form>
+                </el-row>
+                <div slot="footer" class="dialog-footer">
+                  <el-button @click="dialogEditVisible = false">取 消</el-button>
+                  <el-button type="primary" @click="editParameter">确 定</el-button>
+                </div>
+              </el-dialog>
+
               <el-row>
-                <el-table :data="problem.func_config.parameter">
+                <el-table :data="problem.judge_config.func_config.parameter">
                   <el-table-column prop="name" label="参数名称"></el-table-column>
                   <el-table-column prop="type" label="参数类型"></el-table-column>
-                  <el-table-column prop="arr" label="数组" :formatter="boolFormatter"></el-table-column>
                   <el-table-column prop="ptr" label="指针" :formatter="boolFormatter"></el-table-column>
+                  <el-table-column prop="arr" label="数组" :formatter="boolFormatter"></el-table-column>
                   <el-table-column fixed="right" label="操作">
                     <template slot-scope="scope">
-                      <el-button size="small" @click="editParameter(scope.row)">编辑</el-button>
+                      <el-button size="small" @click="openEditParameter(scope.row)">编辑</el-button>
                       <el-button size="small" @click="deleteParameter(scope.row.id)">删除</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
               </el-row>
+              <el-row>
+                <Accordion title="初始化代码">
+                  <code-mirror v-model="problem.judge_config.func_config.init"></code-mirror>
+                </Accordion>
+              </el-row>
+            </el-form-item>
+
+            <el-form-item v-if="problem.judge_config.judge_mode===2">
+              <el-row>
+                <el-button type="primary" @click="dialogCondVisible = true">生成条件代码</el-button>
+              </el-row>
+              <el-row>
+                <Accordion title="初始代码">
+                  <code-mirror v-model="problem.judge_config.segment_config.code"></code-mirror>
+                </Accordion>
+              </el-row>
+              <el-row>
+                <Accordion title="条件代码">
+                  <code-mirror v-model="problem.judge_config.segment_config.judge_code"></code-mirror>
+                </Accordion>
+              </el-row>
+
+              <el-dialog title="添加条件" :visible.sync="dialogCondVisible">
+                <el-row>
+                  <el-form :model="form">
+                    <el-row>
+                      <el-button @click="addCondition" type="text" size="small" icon="el-icon-circle-plus">添加</el-button>
+                    </el-row>
+                    <el-row>
+                      <el-table :data="condition.condition" style="width: 100%">
+                        <el-table-column prop="id" label="序号" width="50" type="index" align="center"
+                        :index="index=>index+1"/>
+                        <el-table-column prop="parameter" label="变量名" align="center">
+                          <template #default="scope">
+                              <el-input v-model="scope.row.parameter"> </el-input>
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="data_type" label="变量类型" align="center">
+                          <template #default="scope">
+                            <el-select v-model="scope.row.data_type" placeholder="请选择">
+                              <el-option v-for="item in conditionType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                            </el-select>
+                          </template>
+                        </el-table-column>
+                        <el-table-column align="center" prop="relation" label="关系">
+                          <template #default="scope">
+                            <el-select v-model="scope.row.relation" placeholder="请选择">
+                              <el-option v-for="item in conditionRelation" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                            </el-select>
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="value" label="值" align="center">
+                          <template #default="scope">
+                              <el-input v-model="scope.row.value"></el-input>
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="value_type" label="值类型" align="center">
+                          <template #default="scope">
+                            <el-select v-model="scope.row.value_type" placeholder="请选择">
+                              <el-option v-for="item in conditionType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                            </el-select>
+                          </template>
+                        </el-table-column>
+                        <el-table-column label="操作" width="120" align="center">
+                            <template #default="scope">
+                                <div style="display: flex;">
+                                    <el-button size="small"
+                                                icon="Delete"
+                                                type="text"
+                                                @click="delelteCondition(scope.$index)">删除
+                                    </el-button>
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                      
+                    </el-row>
+                  </el-form>
+                </el-row>
+                <div slot="footer" class="dialog-footer">
+                  <el-button @click="dialogCondVisible = false">取 消</el-button>
+                  <el-button type="primary" @click="createJudgeCode">确 定</el-button>
+                </div>
+              </el-dialog>
 
             </el-form-item>
-            
-            <el-row>
-              <el-form-item v-if="problem.test_mode===1">
-                <Accordion title="初始化代码">
-                  <code-mirror v-model="problem.func_config.init"></code-mirror>
-                </Accordion>
-              </el-form-item>
-            </el-row>
           </el-tab-pane>
 
           <el-tab-pane label="测试用例" name="second">
@@ -455,7 +565,80 @@
             label: 'char'
           }
         ],
+        conditionRelation: [
+          {
+            value: '=',
+            label: '='
+          },
+          {
+            value: '>',
+            label: '>'
+          },
+          {
+            value: '>=',
+            label: '>='
+          },
+          {
+            value: '<',
+            label: '<'
+          },
+          {
+            value: '<=',
+            label: '<='
+          },
+          {
+            value: '!=',
+            label: '!='
+          }
+        ],
+        conditionType: [
+          {
+            value: 'const',
+            label: '常量'
+          },
+          {
+            value: 'int',
+            label: 'int'
+          },
+          {
+            value: 'int*',
+            label: 'int*'
+          },
+          {
+            value: 'int[]',
+            label: 'int[]'
+          },
+          {
+            value: 'double',
+            label: 'double'
+          },
+          {
+            value: 'double*',
+            label: 'double*'
+          },
+          {
+            value: 'double[]',
+            label: 'double[]'
+          },
+          {
+            value: 'char',
+            label: 'char'
+          },
+          {
+            value: 'char*',
+            label: 'char*'
+          },
+          {
+            value: 'char[]',
+            label: 'char[]'
+          }
+        ],
         dialogFormVisible: false,
+        dialogEditVisible: false,
+        dialogCondVisible: false,
+        condition: {
+          condition: []
+        },
         nextID: 1,
         parameterConfig: {
           id: 1,
@@ -478,11 +661,19 @@
           extra: false,
           languages: [],
           io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'},
-          func_config: {
-            name: '',
-            parameter: [],
-            init: '',
-            return_type: ''
+          judge_config: {
+            judge_mode: 0,
+            code_template: '',
+            func_config: {
+              name: '',
+              parameter: [],
+              init: '',
+              return_type: ''
+            },
+            segment_config: {
+              code: '',
+              judge_code: ''
+            }
           }
         },
         reProblem: {
@@ -556,12 +747,19 @@
             format: 5,
             function: 5
           },
-          test_mode: 0,
-          func_config: {
-            name: '',
-            parameter: [],
-            init: '',
-            return_type: ''
+          judge_config: {
+            judge_mode: 0,
+            code_template: '',
+            func_config: {
+              name: '',
+              parameter: [],
+              init: '',
+              return_type: ''
+            },
+            segment_config: {
+              code: '',
+              judge_code: ''
+            }
           }
         }
         let contestID = this.$route.params.contestId
@@ -632,20 +830,37 @@
       }
     },
     methods: {
+      delelteCondition (index) {
+        this.condition.condition.splice(index, 1)
+      },
+      addCondition () {
+        this.condition.condition.push({
+          parameter: '',
+          data_type: '',
+          relation: '',
+          value: '',
+          value_type: ''
+        })
+      },
       boolFormatter (row, column, cellValue) {
         return String(cellValue)
       },
       deleteParameter (id) {
-        var index = this.problem.func_config.parameter.findIndex(item => {
+        let index = this.problem.judge_config.func_config.parameter.findIndex(item => {
           if (item.id === id) {
             return true
           }
         })
-        console.log(index)
-        this.problem.func_config.parameter.splice(index, 1)
+        this.problem.judge_config.func_config.parameter.splice(index, 1)
+      },
+      clearParameter () {
+        this.parameterConfig.name = ''
+        this.parameterConfig.type = ''
+        this.parameterConfig.arr = false
+        this.parameterConfig.ptr = false
       },
       addParameter () {
-        let index = this.problem.func_config.parameter.findIndex(item => {
+        let index = this.problem.judge_config.func_config.parameter.findIndex(item => {
           if (item.name === this.parameterConfig.name) {
             return true
           }
@@ -654,18 +869,33 @@
           this.$message.error('参数名已存在')
           return
         }
-        this.problem.func_config.parameter.push({
+        this.problem.judge_config.func_config.parameter.push({
           id: this.nextID++,
           name: this.parameterConfig.name,
           type: this.parameterConfig.type,
           arr: this.parameterConfig.arr,
           ptr: this.parameterConfig.ptr
         })
-        this.parameterConfig.name = ''
-        this.parameterConfig.type = ''
-        this.parameterConfig.arr = false
-        this.parameterConfig.ptr = false
+        this.clearParameter()
         this.dialogFormVisible = false
+      },
+      openEditParameter (row) {
+        this.parameterConfig = {...row}
+        this.dialogEditVisible = true
+      },
+      editParameter () {
+        let index = this.problem.judge_config.func_config.parameter.findIndex(item => {
+          if (item.id === this.parameterConfig.id) {
+            return true
+          }
+        })
+        if (index === -1) {
+          this.$message.error('参数不存在')
+          return
+        }
+        this.$set(this.problem.judge_config.func_config.parameter, index, {...this.parameterConfig})
+        this.clearParameter()
+        this.dialogEditVisible = false
       },
       switchSpj () {
         if (this.testCaseUploaded) {
@@ -773,6 +1003,19 @@
           })
         })
       },
+      createJudgeCode () {
+        for (let cond of this.condition.condition) {
+          if (cond.data_type === 'const') {
+            this.$error('变量不能为常量')
+            return
+          }
+        }
+        api.createJudgeCode(this.condition).then(res => {
+          this.problem.judge_config.segment_config.judge_code = res.data.data
+          this.dialogCondVisible = false
+        }).catch(() => {
+        })
+      },
       submit () {
         if (!this.problem.samples.length) {
           this.$error('Sample is required')
@@ -841,7 +1084,6 @@
         if (funcName === 'editContestProblem') {
           this.problem.contest_id = this.contest.id
         }
-        console.log(this.problem)
         api[funcName](this.problem).then(res => {
           if (this.routeName === 'create-contest-problem' || this.routeName === 'edit-contest-problem') {
             this.$router.push({name: 'contest-problem-list', params: {contestId: this.$route.params.contestId}})

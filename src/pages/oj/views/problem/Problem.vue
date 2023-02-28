@@ -263,6 +263,14 @@
           tags: [],
           io_mode: {'io_mode': 'Standard IO'}
         },
+        condition: [],
+        cond: {
+          parameter: '',
+          data_type: '',
+          relation: '',
+          value: '',
+          value_type: ''
+        },
         pie: pie,
         largePie: largePie,
         // echarts 无法获取隐藏dom的大小，需手动指定
@@ -317,6 +325,8 @@
           let template = this.problem.template
           if (template && template[this.language]) {
             this.code = template[this.language]
+          } else if (this.problem.judge_config.judge_mode === 1) {
+            this.code = this.problem.judge_config.func_config.func_template
           }
         }, () => {
           this.$Loading.error()
