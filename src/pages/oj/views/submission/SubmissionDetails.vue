@@ -31,7 +31,7 @@
     </Col>
 
     <Col :span="20">
-      <Highlight :code="submission.code" :language="submission.language" :border-color="status.color"></Highlight>
+      <Highlight :code="realCode" :language="submission.language" :border-color="status.color"></Highlight>
     </Col>
     <Col v-if="submission.can_unshare" :span="20">
       <div id="share-btn">
@@ -271,6 +271,12 @@
       },
       isAdminRole () {
         return this.$store.getters.isAdminRole
+      },
+      realCode () {
+        if (this.submission.raw_code !== undefined) {
+          return this.submission.raw_code
+        }
+        return this.submission.code
       }
     }
   }
