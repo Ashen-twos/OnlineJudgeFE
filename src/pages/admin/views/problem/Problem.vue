@@ -231,10 +231,10 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="4">
-                    <el-form-item label="分值" required>
-                      <el-input type="Number" placeholder="5" v-model="problem.extra_score.function"></el-input>
-                    </el-form-item>
-                  </el-col>
+                  <el-form-item label="分值" required>
+                    <el-input type="Number" placeholder="5" v-model="problem.extra_score.function"></el-input>
+                  </el-form-item>
+                </el-col>
                 <el-col :span="16">
                   <el-form-item label="函数列表">
                     <span class="tags">
@@ -248,7 +248,7 @@
                       >{{tag}}</el-tag>
                     </span>
                     <el-autocomplete
-                      v-if="inputVisible"
+                      v-if="funcVisible"
                       size="mini"
                       class="input-new-tag"
                       popper-class="problem-tag-poper"
@@ -258,7 +258,48 @@
                       @select="addFunc"
                       :fetch-suggestions="querySearch">
                     </el-autocomplete>
-                    <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ 新增函数</el-button>
+                    <el-button class="button-new-tag" v-else size="small" @click="funcVisible = true">+ 新增函数</el-button>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-tab-pane>
+
+            <el-tab-pane label="额外空间" name="third">
+              <el-row :span="24" :gutter="80">
+                <el-col :span="4">
+                    <el-form-item label="是否启用">
+                      <el-switch v-model="problem.extra_config.memory.enable"></el-switch>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <el-form-item label="分值" required>
+                    <el-input type="Number" placeholder="5" v-model="problem.extra_score.memory"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="16">
+                  <el-form-item label="预设数组">
+                    <span class="tags">
+                      <el-tag
+                        v-for="tag in problem.extra_config.memory.parameter"
+                        :closable="true"
+                        :close-transition="false"
+                        :key="tag"
+                        type="success"
+                        @close="closePara(tag)"
+                      >{{tag}}</el-tag>
+                    </span>
+                    <el-autocomplete
+                      v-if="paraVisible"
+                      size="mini"
+                      class="input-new-tag"
+                      popper-class="problem-tag-poper"
+                      v-model="paraInput"
+                      :trigger-on-focus="false"
+                      @keyup.enter.native="addPara"
+                      @select="addPara"
+                      :fetch-suggestions="querySearch">
+                    </el-autocomplete>
+                    <el-button class="button-new-tag" v-else size="small" @click="paraVisible = true">+ 新增数组</el-button>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -683,8 +724,11 @@
         testCaseUploaded: false,
         allLanguage: {},
         inputVisible: false,
+        funcVisible: false,
+        paraVisible: false,
         tagInput: '',
         funcInput: '',
+        paraInput: '',
         template: {},
         title: '',
         spjMode: '',
@@ -741,11 +785,16 @@
             function: {
               enable: false,
               function_list: []
+            },
+            memory: {
+              enable: false,
+              parameter: []
             }
           },
           extra_score: {
             format: 5,
-            function: 5
+            function: 5,
+            memory: 5
           },
           judge_config: {
             judge_mode: 0,
@@ -944,14 +993,25 @@
         if (inputValue) {
           this.problem.extra_config.function.function_list.push(inputValue)
         }
-        this.inputVisible = false
+        this.funcVisible = false
         this.funcInput = ''
+      },
+      addPara () {
+        let inputValue = this.paraInput
+        if (inputValue) {
+          this.problem.extra_config.memory.parameter.push(inputValue)
+        }
+        this.paraVisible = false
+        this.paraInput = ''
       },
       closeTag (tag) {
         this.problem.tags.splice(this.problem.tags.indexOf(tag), 1)
       },
       closeFunc (tag) {
         this.problem.extra_config.function.function_list.splice(this.problem.extra_config.function.function_list.indexOf(tag), 1)
+      },
+      closePara (tag) {
+        this.problem.extra_config.memory.parameter.splice(this.problem.extra_config.memory.parameter.indexOf(tag), 1)
       },
       addSample () {
         this.problem.samples.push({input: '', output: ''})
