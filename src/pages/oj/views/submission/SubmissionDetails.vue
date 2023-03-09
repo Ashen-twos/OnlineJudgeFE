@@ -273,7 +273,7 @@
         return this.$store.getters.isAdminRole
       },
       realCode () {
-        if (this.submission.raw_code !== undefined) {
+        if (this.submission.raw_code !== null) {
           return this.submission.raw_code
         }
         return this.submission.code

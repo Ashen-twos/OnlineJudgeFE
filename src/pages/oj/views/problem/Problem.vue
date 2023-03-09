@@ -46,6 +46,20 @@
             <p class="content">{{problem.source}}</p>
           </div>
 
+          <div v-if="problem.extra_config.format.enable">
+            <FormatPreview :indentSize = problem.extra_config.format.indent_size
+                           :leftBigPara = problem.extra_config.format.left_big_para></FormatPreview>
+          </div>
+
+          <div v-if="problem.extra_config.function.enable">
+          </div>
+
+          <div v-if="problem.extra_config.memory.enable">
+          </div>
+
+          <div v-if="problem.extra_config.runtime.enable">
+          </div>
+
         </div>
       </Panel>
       <!--problem main end-->
@@ -215,6 +229,7 @@
   import {mapGetters, mapActions} from 'vuex'
   import {types} from '../../../../store'
   import CodeMirror from '@oj/components/CodeMirror.vue'
+  import FormatPreview from '@oj/components/FormatPreview.vue'
   import storage from '@/utils/storage'
   import {FormMixin} from '@oj/components/mixins'
   import {JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey} from '@/utils/constants'
@@ -227,7 +242,8 @@
   export default {
     name: 'Problem',
     components: {
-      CodeMirror
+      CodeMirror,
+      FormatPreview
     },
     mixins: [FormMixin],
     data () {
@@ -261,7 +277,14 @@
             username: ''
           },
           tags: [],
-          io_mode: {'io_mode': 'Standard IO'}
+          io_mode: {'io_mode': 'Standard IO'},
+          extra_config: {
+            format: {
+              enable: false,
+              left_big_para: false,
+              indent_size: 4
+            }
+          }
         },
         condition: [],
         cond: {
@@ -312,6 +335,7 @@
           })
           problem.languages = problem.languages.sort()
           this.problem = problem
+          console.log(this.problem)
           if (problem.statistic_info) {
             this.changePie(problem)
           }
@@ -435,7 +459,6 @@
           contest_id: this.contestID,
           extra_option: this.fullJudge
         }
-        console.log(data)
         if (this.captchaRequired) {
           data.captcha = this.captchaCode
         }
