@@ -826,12 +826,17 @@
             memory: {
               enable: false,
               parameter: []
+            },
+            runtime: {
+              enable: false,
+              limit: 1000
             }
           },
           extra_score: {
             format: 5,
             function: 5,
-            memory: 5
+            memory: 5,
+            runtime: 5
           },
           judge_config: {
             judge_mode: 0,
