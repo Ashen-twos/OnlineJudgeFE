@@ -301,6 +301,11 @@ export default {
     return ajax('admin/create_judge_code', 'post', {
       data
     })
+  },
+  getFunctionPreview (data) {
+    return ajax('admin/function_preview', 'post', {
+      data
+    })
   }
 }
 

@@ -357,11 +357,21 @@
                     </el-select>
                   </el-form-item>
                 </el-col>
-                <el-col :span="8">
+                <el-col :span="4">
                   <el-form-item label="参数选项" required>
                       <el-button type="primary" @click="dialogFormVisible = true">添加参数</el-button>                   
                   </el-form-item>
                 </el-col>
+                <el-col :span="4">
+                  <el-form-item label="预览" required>
+                      <el-button type="primary" @click="functionPreview">预览</el-button>                   
+                  </el-form-item>
+                </el-col>
+
+                <el-dialog title="函数预览" :visible.sync="dialogPreviewVisible">
+                  <code-mirror v-model="funcPreview"></code-mirror>
+                </el-dialog>
+
               </el-row>
 
               <el-dialog title="添加参数" :visible.sync="dialogFormVisible">
@@ -602,6 +612,10 @@
     },
     data () {
       return {
+        styleObject: {
+          'border-left': '2px solid green'
+        },
+        funcPreview: '',
         dataType: [
           {
             value: 'void',
@@ -699,6 +713,7 @@
         dialogFormVisible: false,
         dialogEditVisible: false,
         dialogCondVisible: false,
+        dialogPreviewVisible: false,
         condition: {
           condition: []
         },
@@ -901,6 +916,18 @@
       }
     },
     methods: {
+      functionPreview () {
+        let data = {
+          name: this.problem.judge_config.func_config.name,
+          return_type: this.problem.judge_config.func_config.return_type,
+          parameter: this.problem.judge_config.func_config.parameter
+        }
+        api.getFunctionPreview(data).then(res => {
+          this.funcPreview = res.data.data
+          this.dialogPreviewVisible = true
+        }).catch(() => {
+        })
+      },
       delelteCondition (index) {
         this.condition.condition.splice(index, 1)
       },
@@ -1238,6 +1265,17 @@
     width: auto;
     max-width: 80%;
     overflow-x: scroll;
+  }
+</style>
+
+<style scoped lang="less">
+  pre {
+    padding: 0;
+    display: block;
+    code {
+      padding: 20px;
+      font-size: 1.1em;
+    }
   }
 </style>
 
