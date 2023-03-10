@@ -1,12 +1,5 @@
 <template>
-  <Card dis-hover>
-    <p class="title">代码格式</p>
-    <Row>
-      <Col :span="12"><p class="content">缩进长度: {{indentSize}}</p></Col>
-      <Col :span="12"><p class="content">左大括号位置: {{ location }}</p></Col>
-    </Row>
-      <Highlight :code="realCode" language="C++"></Highlight>
-  </Card>
+  <Highlight :code="realCode" language="C++"></Highlight>
 </template>
 
 <script>
@@ -48,13 +41,6 @@ export default {
         code = code.replace(',', ', ')
       }
       return code
-    },
-    location () {
-      if (this.leftBigPara) {
-        return '行首'
-      } else {
-        return '行末'
-      }
     }
   }
 }

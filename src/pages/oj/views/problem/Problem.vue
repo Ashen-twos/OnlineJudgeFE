@@ -46,18 +46,9 @@
             <p class="content">{{problem.source}}</p>
           </div>
 
-          <div v-if="problem.extra_config.format.enable">
-            <FormatPreview :indentSize = problem.extra_config.format.indent_size
-                           :leftBigPara = problem.extra_config.format.left_big_para></FormatPreview>
-          </div>
-
-          <div v-if="problem.extra_config.function.enable">
-          </div>
-
-          <div v-if="problem.extra_config.memory.enable">
-          </div>
-
-          <div v-if="problem.extra_config.runtime.enable">
+          <div v-if="problem.extra">
+            <p class="title">附加测试</p>
+            <ExtraInfo :extra_config="problem.extra_config" :extra_score="problem.extra_score"></ExtraInfo>
           </div>
 
         </div>
@@ -229,7 +220,7 @@
   import {mapGetters, mapActions} from 'vuex'
   import {types} from '../../../../store'
   import CodeMirror from '@oj/components/CodeMirror.vue'
-  import FormatPreview from '@oj/components/FormatPreview.vue'
+  import ExtraInfo from '@oj/components/ExtraInfo.vue'
   import storage from '@/utils/storage'
   import {FormMixin} from '@oj/components/mixins'
   import {JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey} from '@/utils/constants'
@@ -243,7 +234,7 @@
     name: 'Problem',
     components: {
       CodeMirror,
-      FormatPreview
+      ExtraInfo
     },
     mixins: [FormMixin],
     data () {
@@ -283,6 +274,15 @@
               enable: false,
               left_big_para: false,
               indent_size: 4
+            },
+            function: {
+              enable: false
+            },
+            memory: {
+              enable: false
+            },
+            runtime: {
+              enable: false
             }
           }
         },

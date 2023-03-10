@@ -162,12 +162,14 @@
             </el-col>
           </el-row>
         </el-form-item>
-        <el-form-item :label="$t('m.Special_Judge')" :error="error.spj">
+
+        <!-- <el-form-item :label="$t('m.Special_Judge')" :error="error.spj">
           <el-col :span="24">
             <el-checkbox v-model="problem.spj" @click.native.prevent="switchSpj()">{{$t('m.Use_Special_Judge')}}</el-checkbox>
           </el-col>
-        </el-form-item>
-        <el-form-item v-if="problem.spj">
+        </el-form-item> -->
+
+        <!-- <el-form-item v-if="problem.spj">
           <Accordion :title="$t('m.Special_Judge_Code')">
             <template slot="header">
               <span>{{$t('m.SPJ_language')}}</span>
@@ -184,7 +186,7 @@
             </template>
             <code-mirror v-model="problem.spj_code" :mode="spjMode"></code-mirror>
           </Accordion>
-        </el-form-item>
+        </el-form-item> -->
 
         <!-- 附加测试 -->
         <el-form-item :label="$t('m.Extra_Judge')">
@@ -300,6 +302,26 @@
                       :fetch-suggestions="querySearch">
                     </el-autocomplete>
                     <el-button class="button-new-tag" v-else size="small" @click="paraVisible = true">+ 新增数组</el-button>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-tab-pane>
+
+            <el-tab-pane label="算法性能" name="furth">
+              <el-row :span="24" :gutter="80">
+                <el-col :span="4">
+                    <el-form-item label="是否启用">
+                      <el-switch v-model="problem.extra_config.runtime.enable"></el-switch>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <el-form-item label="分值" required>
+                    <el-input type="Number" placeholder="5" v-model="problem.extra_score.runtime"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <el-form-item label="运行时间(ms)" required>
+                    <el-input type="Number" placeholder="5" v-model="problem.extra_config.runtime.limit"></el-input>
                   </el-form-item>
                 </el-col>
               </el-row>
