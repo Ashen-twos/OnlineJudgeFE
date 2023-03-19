@@ -150,6 +150,7 @@
         <el-form-item style="margin-top: 20px" :label="$t('m.Hint')">
           <Simditor v-model="problem.hint" placeholder=""></Simditor>
         </el-form-item>
+
         <el-form-item :label="$t('m.Code_Template')">
           <el-row>
             <el-col :span="24" v-for="(v, k) in template" :key="'template'+k">
@@ -162,31 +163,6 @@
             </el-col>
           </el-row>
         </el-form-item>
-
-        <!-- <el-form-item :label="$t('m.Special_Judge')" :error="error.spj">
-          <el-col :span="24">
-            <el-checkbox v-model="problem.spj" @click.native.prevent="switchSpj()">{{$t('m.Use_Special_Judge')}}</el-checkbox>
-          </el-col>
-        </el-form-item> -->
-
-        <!-- <el-form-item v-if="problem.spj">
-          <Accordion :title="$t('m.Special_Judge_Code')">
-            <template slot="header">
-              <span>{{$t('m.SPJ_language')}}</span>
-              <el-radio-group v-model="problem.spj_language">
-                <el-tooltip class="spj-radio" v-for="lang in allLanguage.spj_languages" :key="lang.name" effect="dark"
-                            :content="lang.description" placement="top-start">
-                  <el-radio :label="lang.name">{{ lang.name }}</el-radio>
-                </el-tooltip>
-              </el-radio-group>
-              <el-button type="primary" size="small" icon="el-icon-fa-random" @click="compileSPJ"
-                         :loading="loadingCompile">
-                {{$t('m.Compile')}}
-              </el-button>
-            </template>
-            <code-mirror v-model="problem.spj_code" :mode="spjMode"></code-mirror>
-          </Accordion>
-        </el-form-item> -->
 
         <!-- 附加测试 -->
         <el-form-item :label="$t('m.Extra_Judge')">
@@ -455,7 +431,7 @@
                 </el-table>
               </el-row>
               <el-row>
-                <Accordion title="初始化代码">
+                <Accordion title="初始化代码" information="根据测试用例, 自行读入样例中的数据, 作为函数的参数">
                   <code-mirror v-model="problem.judge_config.func_config.init"></code-mirror>
                 </Accordion>
               </el-row>
@@ -466,12 +442,12 @@
                 <el-button type="primary" @click="dialogCondVisible = true">生成条件代码</el-button>
               </el-row>
               <el-row>
-                <Accordion title="初始代码">
+                <Accordion title="初始代码" information="不含头文件的完整代码, $CODE$代表用户输入位置, $JUDGE$代表条件判定位置">
                   <code-mirror v-model="problem.judge_config.segment_config.code"></code-mirror>
                 </Accordion>
               </el-row>
               <el-row>
-                <Accordion title="条件代码">
+                <Accordion title="条件代码" information="返回值为int的judge函数, 使用原代码同名变量作为参数, 返回0代表合法">
                   <code-mirror v-model="problem.judge_config.segment_config.judge_code"></code-mirror>
                 </Accordion>
               </el-row>

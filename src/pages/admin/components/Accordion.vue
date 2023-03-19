@@ -1,7 +1,12 @@
 <template>
   <div class="accordion">
     <header>
-      <h2>{{title}}</h2>
+      <h2>
+        {{title}} 
+        <el-tooltip v-show="information" class="item" effect="dark" :content="information" placement="top-start">
+          <i class="el-icon-question"></i>
+        </el-tooltip>
+      </h2>
       <div class="header_right">
         <slot name="header"></slot>
       </div>
@@ -20,6 +25,9 @@
       title: {
         type: String,
         required: true
+      },
+      information: {
+        type: String
       }
     },
     data () {

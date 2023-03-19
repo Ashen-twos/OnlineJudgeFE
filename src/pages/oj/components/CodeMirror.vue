@@ -32,10 +32,11 @@
       </Col>
     </Row>
     <codemirror :value="value" :options="options" @change="onEditorCodeChange" ref="myEditor">
-    </codemirror>
+    </codemirror> 
   </div>
 </template>
 <script>
+  import MonacoEditor from 'vue-monaco-editor'
   import utils from '@/utils/utils'
   import { codemirror } from 'vue-codemirror-lite'
 
@@ -62,7 +63,8 @@
   export default {
     name: 'CodeMirror',
     components: {
-      codemirror
+      codemirror,
+      MonacoEditor
     },
     props: {
       value: {
