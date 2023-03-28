@@ -44,7 +44,9 @@ export default {
     FormatPreview
   },
   data () {
-
+    return {
+      
+    }
   },
   props: ['extra_config', 'extra_score'],
   computed: {
