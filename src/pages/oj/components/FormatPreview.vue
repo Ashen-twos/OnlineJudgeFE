@@ -19,8 +19,8 @@ export default {
       type: Number,
       default: 4
     },
-    code: {
-      type: String
+    maxStatement: {
+      type: Number
     },
     leftBigPara: {
       type: Boolean,
@@ -33,12 +33,19 @@ export default {
   },
   computed: {
     realCode () {
-      let code = 'int add(int a,int b)\n{\n' + ' '.repeat(this.indentSize) + 'return a+b;\n}'
-      if (this.leftBigPara) {
+      let code = 'int func(int a,int b,int c)\n{\n' + ' '.repeat(this.indentSize) + 'a++;b++;'
+      if (this.maxStatement < 3) {
+        code += '\n' + ' '.repeat(this.indentSize)
+      }
+      code += 'c--;\n' + ' '.repeat(this.indentSize) + 'return a+b+c;\n}'
+      if (!this.leftBigPara) {
         code = code.replace('\n{', '{')
       }
       if (this.commaSpace) {
-        code = code.replace(',', ', ')
+        let regc = new RegExp(',', 'g')
+        let regf = new RegExp(';', 'g')
+        code = code.replace(regc, ', ')
+        code = code.replace(regf, '; ')
       }
       return code
     }

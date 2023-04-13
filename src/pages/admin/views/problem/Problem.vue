@@ -184,9 +184,16 @@
                     <el-input type="Number" placeholder="5" v-model="problem.extra_score.format"></el-input>
                   </el-form-item>
                 </el-col>
+
                 <el-col :span="4">
                   <el-form-item label="缩进长度" required>
-                    <el-input type="Number" placeholder="4" v-model="problem.extra_config.format.indent_size"></el-input>
+                    <el-input type="Number" placeholder="" v-model.number="problem.extra_config.format.indent_size"></el-input>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="4">
+                  <el-form-item label="单行语句上限" required>
+                    <el-input type="Number" placeholder="3" v-model.number="problem.extra_config.format.max_statement"></el-input>
                   </el-form-item>
                 </el-col>
 
@@ -198,51 +205,199 @@
                     </el-select>
                   </el-form-item>
                 </el-col>
+
+                <el-col :span="4">
+                  <el-form-item label="逗号后空格" required>
+                    <el-select v-model="problem.extra_config.format.comma_space">
+                      <el-option label="开启" :value="true"></el-option>
+                      <el-option label="关闭" :value="false"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+
               </el-row>
             </el-tab-pane>
 
-            <el-tab-pane label="函数使用" name="second">
+            <el-tab-pane label="代码风格" name="second">
               <el-row :span="24" :gutter="80">
-                <el-col :span="4">
-                    <el-form-item label="是否启用">
-                      <el-switch v-model="problem.extra_config.function.enable"></el-switch>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="4">
-                  <el-form-item label="分值" required>
-                    <el-input type="Number" placeholder="5" v-model="problem.extra_score.function"></el-input>
+                <el-col :span="6">
+                  <el-form-item label="是否启用">
+                    <el-switch v-model="problem.extra_config.style.enable"></el-switch>
                   </el-form-item>
                 </el-col>
-                <el-col :span="16">
-                  <el-form-item label="函数列表">
+                <el-col :span="6">
+                  <el-form-item label="分值" required>
+                    <el-input type="Number" placeholder="5" v-model="problem.extra_score.style"></el-input>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="6">
+                  <el-form-item label="全局变量前缀" required>
+                    <el-input type="text" v-model="problem.extra_config.style.global_prefix"></el-input>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="6">
+                  <el-form-item label="禁用单字母命名" required>
+                    <el-select v-model="problem.extra_config.style.single_name">
+                      <el-option label="开启" :value="true"></el-option>
+                      <el-option label="关闭" :value="false"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+              <el-row :span="24" :gutter="80">
+                <el-col :span="8">
+                  <el-form-item label="函数命名风格" required>
+                    <el-select v-model="problem.extra_config.style.func_naming">
+                      <el-option label="无" :value="0"></el-option>
+                      <el-option label="多音节驼峰式" :value="1"></el-option>
+                      <el-option label="全大写" :value="2"></el-option>
+                      <el-option label="全小写" :value="3"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="8">
+                  <el-form-item label="全局变量命名风格" required>
+                    <el-select v-model="problem.extra_config.style.global_naming">
+                      <el-option label="无" :value="0"></el-option>
+                      <el-option label="多音节驼峰式" :value="1"></el-option>
+                      <el-option label="全大写" :value="2"></el-option>
+                      <el-option label="全小写" :value="3"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="8">
+                  <el-form-item label="局部变量命名风格" required>
+                    <el-select v-model="problem.extra_config.style.local_naming">
+                      <el-option label="无" :value="0"></el-option>
+                      <el-option label="多音节驼峰式" :value="1"></el-option>
+                      <el-option label="全大写" :value="2"></el-option>
+                      <el-option label="全小写" :value="3"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+              <el-row :span="24" :gutter="80">
+                <el-col :span="12">
+                  <el-form-item label="白名单">
                     <span class="tags">
                       <el-tag
-                        v-for="tag in problem.extra_config.function.function_list"
+                        v-for="tag in problem.extra_config.style.white_list"
                         :closable="true"
                         :close-transition="false"
                         :key="tag"
                         type="success"
-                        @close="closeFunc(tag)"
+                        @close="closeStyleWhite(tag)"
                       >{{tag}}</el-tag>
                     </span>
                     <el-autocomplete
-                      v-if="funcVisible"
+                      v-if="styleWhiteVisible"
                       size="mini"
                       class="input-new-tag"
                       popper-class="problem-tag-poper"
-                      v-model="funcInput"
+                      v-model="styleWhiteInput"
                       :trigger-on-focus="false"
-                      @keyup.enter.native="addFunc"
-                      @select="addFunc"
+                      @keyup.enter.native="addStyleWhite"
+                      @select="addStyleWhite"
                       :fetch-suggestions="querySearch">
                     </el-autocomplete>
-                    <el-button class="button-new-tag" v-else size="small" @click="funcVisible = true">+ 新增函数</el-button>
+                    <el-button class="button-new-tag" v-else size="small" @click="styleWhiteVisible = true">+ 新增</el-button>
                   </el-form-item>
                 </el-col>
               </el-row>
             </el-tab-pane>
 
-            <el-tab-pane label="额外空间" name="third">
+            <el-tab-pane label="函数使用" name="third">
+              <el-row :span="24" :gutter="80">
+                <el-col :span="6">
+                    <el-form-item label="是否启用">
+                      <el-switch v-model="problem.extra_config.function.enable"></el-switch>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                  <el-form-item label="分值" required>
+                    <el-input type="Number" placeholder="5" v-model="problem.extra_score.function"></el-input>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="6">
+                  <el-form-item label="函数内最多语句数" required>
+                    <el-input type="Number" placeholder="10" v-model.number="problem.extra_config.function.max_statement"></el-input>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="6">
+                  <el-form-item label="函数内禁止IO" required>
+                    <el-select v-model="problem.extra_config.function.disableIO">
+                      <el-option label="开启" :value="true"></el-option>
+                      <el-option label="关闭" :value="false"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :span="24" :gutter="80">
+                <el-col :span="12">
+                  <el-form-item label="黑名单">
+                    <span class="tags">
+                      <el-tag
+                        v-for="tag in problem.extra_config.function.black_list"
+                        :closable="true"
+                        :close-transition="false"
+                        :key="tag"
+                        type="success"
+                        @close="closeFuncBlack(tag)"
+                      >{{tag}}</el-tag>
+                    </span>
+                    <el-autocomplete
+                      v-if="funcBlackVisible"
+                      size="mini"
+                      class="input-new-tag"
+                      popper-class="problem-tag-poper"
+                      v-model="funcBlackInput"
+                      :trigger-on-focus="false"
+                      @keyup.enter.native="addFuncBlack"
+                      @select="addFuncBlack"
+                      :fetch-suggestions="querySearch">
+                    </el-autocomplete>
+                    <el-button class="button-new-tag" v-else size="small" @click="funcBlackVisible = true">+ 新增函数</el-button>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="12">
+                  <el-form-item label="白名单">
+                    <span class="tags">
+                      <el-tag
+                        v-for="tag in problem.extra_config.function.white_list"
+                        :closable="true"
+                        :close-transition="false"
+                        :key="tag"
+                        type="success"
+                        @close="closeFuncWhite(tag)"
+                      >{{tag}}</el-tag>
+                    </span>
+                    <el-autocomplete
+                      v-if="funcWhiteVisible"
+                      size="mini"
+                      class="input-new-tag"
+                      popper-class="problem-tag-poper"
+                      v-model="funcWhiteInput"
+                      :trigger-on-focus="false"
+                      @keyup.enter.native="addFuncWhite"
+                      @select="addFuncWhite"
+                      :fetch-suggestions="querySearch">
+                    </el-autocomplete>
+                    <el-button class="button-new-tag" v-else size="small" @click="funcWhiteVisible = true">+ 新增函数</el-button>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-tab-pane>
+
+            <el-tab-pane label="内存使用" name="furth">
               <el-row :span="24" :gutter="80">
                 <el-col :span="4">
                     <el-form-item label="是否启用">
@@ -254,11 +409,19 @@
                     <el-input type="Number" placeholder="5" v-model="problem.extra_score.memory"></el-input>
                   </el-form-item>
                 </el-col>
-                <el-col :span="16">
-                  <el-form-item label="预设数组">
+                <el-col :span="4">
+                  <el-form-item label="指针内存检测" required>
+                    <el-select v-model="problem.extra_config.memory.check_ptr_free">
+                      <el-option label="开启" :value="true"></el-option>
+                      <el-option label="关闭" :value="false"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="白名单">
                     <span class="tags">
                       <el-tag
-                        v-for="tag in problem.extra_config.memory.parameter"
+                        v-for="tag in problem.extra_config.memory.white_list"
                         :closable="true"
                         :close-transition="false"
                         :key="tag"
@@ -283,7 +446,7 @@
               </el-row>
             </el-tab-pane>
 
-            <el-tab-pane label="算法性能" name="furth">
+            <el-tab-pane label="运行效率" name="fifth">
               <el-row :span="24" :gutter="80">
                 <el-col :span="4">
                     <el-form-item label="是否启用">
@@ -292,12 +455,17 @@
                 </el-col>
                 <el-col :span="4">
                   <el-form-item label="分值" required>
-                    <el-input type="Number" placeholder="5" v-model="problem.extra_score.runtime"></el-input>
+                    <el-input type="Number" placeholder="5" v-model.number="problem.extra_score.runtime"></el-input>
                   </el-form-item>
                 </el-col>
                 <el-col :span="4">
                   <el-form-item label="运行时间(ms)" required>
-                    <el-input type="Number" placeholder="5" v-model="problem.extra_config.runtime.limit"></el-input>
+                    <el-input type="Number" placeholder="100" v-model.number="problem.extra_config.runtime.time"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <el-form-item label="内存占用(MB)" required>
+                    <el-input type="Number" placeholder="64" v-model.number="problem.extra_config.runtime.memory"></el-input>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -737,10 +905,14 @@
         testCaseUploaded: false,
         allLanguage: {},
         inputVisible: false,
-        funcVisible: false,
+        funcBlackVisible: false,
+        funcWhiteVisible: false,
+        styleWhiteVisible: false,
         paraVisible: false,
         tagInput: '',
-        funcInput: '',
+        funcBlackInput: '',
+        funcWhiteInput: '',
+        styleWhiteInput: '',
         paraInput: '',
         template: {},
         title: '',
@@ -793,25 +965,41 @@
             format: {
               enable: false,
               indent_size: 4,
-              left_big_para: true
+              left_big_para: false,
+              comma_space: false,
+              max_statement: 3
             },
             function: {
               enable: false,
-              function_list: []
+              black_list: [],
+              white_list: [],
+              max_statement: 10,
+              disableIO: false
             },
             memory: {
               enable: false,
-              parameter: []
+              white_list: [],
+              check_ptr_free: false
+            },
+            style: {
+              global_prefix: '',
+              white_list: [],
+              func_naming: 0,
+              global_naming: 0,
+              local_naming: 0,
+              single_name: false
             },
             runtime: {
               enable: false,
-              limit: 1000
+              time: 100,
+              memory: 64
             }
           },
           extra_score: {
             format: 5,
             function: 5,
             memory: 5,
+            style: 5,
             runtime: 5
           },
           judge_config: {
@@ -1018,18 +1206,34 @@
         this.inputVisible = false
         this.tagInput = ''
       },
-      addFunc () {
-        let inputValue = this.funcInput
+      addFuncBlack () {
+        let inputValue = this.funcBlackInput
         if (inputValue) {
-          this.problem.extra_config.function.function_list.push(inputValue)
+          this.problem.extra_config.function.black_list.push(inputValue)
         }
-        this.funcVisible = false
-        this.funcInput = ''
+        this.funcBlackVisible = false
+        this.funcBlackInput = ''
+      },
+      addFuncWhite () {
+        let inputValue = this.funcWhiteInput
+        if (inputValue) {
+          this.problem.extra_config.function.white_list.push(inputValue)
+        }
+        this.funcWhiteVisible = false
+        this.funcWhiteInput = ''
+      },
+      addStyleWhite () {
+        let inputValue = this.styleWhiteInput
+        if (inputValue) {
+          this.problem.extra_config.style.white_list.push(inputValue)
+        }
+        this.styleWhiteVisible = false
+        this.styleWhiteInput = ''
       },
       addPara () {
         let inputValue = this.paraInput
         if (inputValue) {
-          this.problem.extra_config.memory.parameter.push(inputValue)
+          this.problem.extra_config.memory.white_list.push(inputValue)
         }
         this.paraVisible = false
         this.paraInput = ''
@@ -1037,11 +1241,17 @@
       closeTag (tag) {
         this.problem.tags.splice(this.problem.tags.indexOf(tag), 1)
       },
-      closeFunc (tag) {
-        this.problem.extra_config.function.function_list.splice(this.problem.extra_config.function.function_list.indexOf(tag), 1)
+      closeFuncBlack (tag) {
+        this.problem.extra_config.function.black_list.splice(this.problem.extra_config.function.black_list.indexOf(tag), 1)
+      },
+      closeFuncWhite (tag) {
+        this.problem.extra_config.function.white_list.splice(this.problem.extra_config.function.white_list.indexOf(tag), 1)
+      },
+      closeStyleWhite (tag) {
+        this.problem.extra_config.style.white_list.splice(this.problem.extra_config.style.white_list.indexOf(tag), 1)
       },
       closePara (tag) {
-        this.problem.extra_config.memory.parameter.splice(this.problem.extra_config.memory.parameter.indexOf(tag), 1)
+        this.problem.extra_config.memory.white_list.splice(this.problem.extra_config.memory.white_list.indexOf(tag), 1)
       },
       addSample () {
         this.problem.samples.push({input: '', output: ''})

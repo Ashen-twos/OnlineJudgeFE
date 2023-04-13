@@ -47,7 +47,7 @@
           </div>
 
           <div v-if="problem.extra">
-            <p class="title">附加测试</p>
+            <p class="title">代码评分</p>
             <ExtraInfo :extra_config="problem.extra_config" :extra_score="problem.extra_score"></ExtraInfo>
           </div>
 
@@ -273,7 +273,9 @@
             format: {
               enable: false,
               left_big_para: false,
-              indent_size: 4
+              indent_size: 4,
+              comma_space: false,
+              max_statement: 3
             },
             function: {
               enable: false
