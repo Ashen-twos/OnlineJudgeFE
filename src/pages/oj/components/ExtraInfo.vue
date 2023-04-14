@@ -25,7 +25,10 @@
       <template #content>
         <Row>
           <Col :span="8"><p class="content">全局变量前缀:  <Tag color="green">{{extra_config.style.global_prefix}}</Tag></p></Col>
-          <Col :span="8"><p class="content">禁用单字母命名:  <Tag color="green">{{switchs(extra_config.style.single_name)}}</Tag></p></Col>
+          <Col :span="8"><p class="content">禁用单字母命名:  
+            <Tag color="green" v-if="extra_config.style.single_name">{{switchs(extra_config.style.single_name)}}</Tag>
+            <Tag color="red" v-if="!extra_config.style.single_name">{{switchs(extra_config.style.single_name)}}</Tag>
+          </p></Col>
         </Row>
         <Row>
           <Col :span="8"><p class="content">函数命名风格:  <Tag color="green">{{styles(extra_config.style.func_naming)}}</Tag></p></Col>
@@ -33,11 +36,15 @@
           <Col :span="8"><p class="content">局部变量命名风格:  <Tag color="green">{{styles(extra_config.style.local_naming)}}</Tag></p></Col>
         </Row>
         <Row>
-          <Col :span="8">
+          <Col :span="24">
             <p class="content">下列命名除外: 
             <Tag color="green" v-for="para in extra_config.style.white_list" :key="para">{{ para }}</Tag></p>
           </Col>
         </Row>
+        <NamePreview :globalPrefix="extra_config.style.global_prefix"
+                     :globalNaming="extra_config.style.global_naming"
+                     :localNaming="extra_config.style.local_naming"
+                     :funcNaming="extra_config.style.func_naming"></NamePreview>
       </template>
     </Panels>
 
@@ -58,7 +65,10 @@
         </Row>
         <Row>
           <Col :span="12"><p class="content">函数内语句上限:  <Tag color="green">{{extra_config.function.max_statement}}</Tag></p></Col>
-          <Col :span="12"><p class="content">函数内禁止IO:  <Tag color="green">{{switchs(extra_config.function.disableIO)}}</Tag></p></Col>
+          <Col :span="12"><p class="content">函数内禁止IO:  
+            <Tag color="green" v-if="extra_config.function.disableIO">{{switchs(extra_config.function.disableIO)}}</Tag>
+            <Tag color="red" v-if="!extra_config.function.disableIO">{{switchs(extra_config.function.disableIO)}}</Tag>
+          </p></Col>
         </Row>
       </template>
     </Panels>
@@ -73,7 +83,10 @@
           </p></Col>
         </Row>
         <Row>
-          <Col :span="12"><p class="content">指针内存释放检查:  <Tag color="green">{{switchs(extra_config.memory.check_ptr_free)}}</Tag></p></Col>
+          <Col :span="12"><p class="content">指针内存释放检查:  
+            <Tag color="green" v-if="extra_config.memory.check_ptr_free">{{switchs(extra_config.memory.check_ptr_free)}}</Tag>
+            <Tag color="red" v-if="!extra_config.memory.check_ptr_free">{{switchs(extra_config.memory.check_ptr_free)}}</Tag>
+          </p></Col>
         </Row>
       </template>
     </Panels>
@@ -82,8 +95,8 @@
       运行效率({{extra_score.runtime}}分)
       <template #content>
         <Row>
-          <Col :span="12"><p class="content">运行时间:  <Tag color="green">{{extra_config.runtime.time}}</Tag></p></Col>
-          <Col :span="12"><p class="content">内存占用:  <Tag color="green">{{extra_config.runtime.memory}}</Tag></p></Col>
+          <Col :span="12"><p class="content">运行时间:  <Tag color="green">{{extra_config.runtime.time}}ms</Tag></p></Col>
+          <Col :span="12"><p class="content">内存占用:  <Tag color="green">{{extra_config.runtime.memory}}MB</Tag></p></Col>
         </Row>
       </template>
     </Panels>
@@ -93,11 +106,13 @@
 <script>
 import {Panel as Panels} from 'iview'
 import FormatPreview from './FormatPreview.vue'
+import NamePreview from './NamePreview.vue'
 export default {
   name: 'formatpreview',
   components: {
     Panels,
-    FormatPreview
+    FormatPreview,
+    NamePreview
   },
   data () {
     return {}

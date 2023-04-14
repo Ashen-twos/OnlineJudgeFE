@@ -174,30 +174,41 @@
           <el-tabs v-model="activeName" type="border-card">
             <el-tab-pane label="代码格式" name="first">
               <el-row :span="24" :gutter="80">
-                <el-col :span="4">
+                <el-col :span="6">
                   <el-form-item label="是否启用">
                     <el-switch v-model="problem.extra_config.format.enable"></el-switch>
                   </el-form-item>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="6">
                   <el-form-item label="分值" required>
                     <el-input type="Number" placeholder="5" v-model="problem.extra_score.format"></el-input>
                   </el-form-item>
                 </el-col>
 
-                <el-col :span="4">
+                <el-col :span="6">
+                  <el-form-item label="评分模式" required>
+                    <el-select v-model="problem.extra_config.format.score_type">
+                      <el-option label="平均分配" :value="1"></el-option>
+                      <el-option label="仅全部通过" :value="2"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+              <el-row :span="24" :gutter="80">
+                <el-col :span="6">
                   <el-form-item label="缩进长度" required>
                     <el-input type="Number" placeholder="" v-model.number="problem.extra_config.format.indent_size"></el-input>
                   </el-form-item>
                 </el-col>
 
-                <el-col :span="4">
+                <el-col :span="6">
                   <el-form-item label="单行语句上限" required>
                     <el-input type="Number" placeholder="3" v-model.number="problem.extra_config.format.max_statement"></el-input>
                   </el-form-item>
                 </el-col>
 
-                <el-col :span="4">
+                <el-col :span="6">
                   <el-form-item label="大括号位置" required>
                     <el-select v-model="problem.extra_config.format.left_big_para">
                       <el-option label="行首" :value="true"></el-option>
@@ -206,7 +217,7 @@
                   </el-form-item>
                 </el-col>
 
-                <el-col :span="4">
+                <el-col :span="6">
                   <el-form-item label="逗号后空格" required>
                     <el-select v-model="problem.extra_config.format.comma_space">
                       <el-option label="开启" :value="true"></el-option>
@@ -214,7 +225,6 @@
                     </el-select>
                   </el-form-item>
                 </el-col>
-
               </el-row>
             </el-tab-pane>
 
@@ -232,16 +242,10 @@
                 </el-col>
 
                 <el-col :span="6">
-                  <el-form-item label="全局变量前缀" required>
-                    <el-input type="text" v-model="problem.extra_config.style.global_prefix"></el-input>
-                  </el-form-item>
-                </el-col>
-
-                <el-col :span="6">
-                  <el-form-item label="禁用单字母命名" required>
-                    <el-select v-model="problem.extra_config.style.single_name">
-                      <el-option label="开启" :value="true"></el-option>
-                      <el-option label="关闭" :value="false"></el-option>
+                  <el-form-item label="评分模式" required>
+                    <el-select v-model="problem.extra_config.style.score_type">
+                      <el-option label="平均分配" :value="1"></el-option>
+                      <el-option label="仅全部通过" :value="2"></el-option>
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -283,6 +287,21 @@
               </el-row>
 
               <el-row :span="24" :gutter="80">
+                <el-col :span="6">
+                  <el-form-item label="全局变量前缀" required>
+                    <el-input type="text" v-model="problem.extra_config.style.global_prefix"></el-input>
+                  </el-form-item>
+                </el-col>
+
+                <el-col :span="6">
+                  <el-form-item label="禁用单字母命名" required>
+                    <el-select v-model="problem.extra_config.style.single_name">
+                      <el-option label="开启" :value="true"></el-option>
+                      <el-option label="关闭" :value="false"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+
                 <el-col :span="12">
                   <el-form-item label="白名单">
                     <span class="tags">
@@ -310,6 +329,10 @@
                   </el-form-item>
                 </el-col>
               </el-row>
+
+              <el-row :span="24" :gutter="80">
+                
+              </el-row>
             </el-tab-pane>
 
             <el-tab-pane label="函数使用" name="third">
@@ -325,6 +348,17 @@
                   </el-form-item>
                 </el-col>
 
+                <el-col :span="6">
+                  <el-form-item label="评分模式" required>
+                    <el-select v-model="problem.extra_config.function.score_type">
+                      <el-option label="平均分配" :value="1"></el-option>
+                      <el-option label="仅全部通过" :value="2"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+              <el-row :span="24" :gutter="80">
                 <el-col :span="6">
                   <el-form-item label="函数内最多语句数" required>
                     <el-input type="Number" placeholder="10" v-model.number="problem.extra_config.function.max_statement"></el-input>
@@ -399,17 +433,29 @@
 
             <el-tab-pane label="内存使用" name="furth">
               <el-row :span="24" :gutter="80">
-                <el-col :span="4">
+                <el-col :span="6">
                     <el-form-item label="是否启用">
                       <el-switch v-model="problem.extra_config.memory.enable"></el-switch>
                     </el-form-item>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="6">
                   <el-form-item label="分值" required>
                     <el-input type="Number" placeholder="5" v-model="problem.extra_score.memory"></el-input>
                   </el-form-item>
                 </el-col>
-                <el-col :span="4">
+
+                <el-col :span="6">
+                  <el-form-item label="评分模式" required>
+                    <el-select v-model="problem.extra_config.memory.score_type">
+                      <el-option label="平均分配" :value="1"></el-option>
+                      <el-option label="仅全部通过" :value="2"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+              <el-row :span="24" :gutter="80">
+                <el-col :span="6">
                   <el-form-item label="指针内存检测" required>
                     <el-select v-model="problem.extra_config.memory.check_ptr_free">
                       <el-option label="开启" :value="true"></el-option>
@@ -417,6 +463,7 @@
                     </el-select>
                   </el-form-item>
                 </el-col>
+
                 <el-col :span="12">
                   <el-form-item label="白名单">
                     <span class="tags">
@@ -448,22 +495,33 @@
 
             <el-tab-pane label="运行效率" name="fifth">
               <el-row :span="24" :gutter="80">
-                <el-col :span="4">
+                <el-col :span="6">
                     <el-form-item label="是否启用">
                       <el-switch v-model="problem.extra_config.runtime.enable"></el-switch>
                     </el-form-item>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="6">
                   <el-form-item label="分值" required>
                     <el-input type="Number" placeholder="5" v-model.number="problem.extra_score.runtime"></el-input>
                   </el-form-item>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="6">
+                  <el-form-item label="评分模式" required>
+                    <el-select v-model="problem.extra_config.runtime.score_type">
+                      <el-option label="平均分配" :value="1"></el-option>
+                      <el-option label="仅全部通过" :value="2"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+              <el-row :span="24" :gutter="80">
+                <el-col :span="6">
                   <el-form-item label="运行时间(ms)" required>
                     <el-input type="Number" placeholder="100" v-model.number="problem.extra_config.runtime.time"></el-input>
                   </el-form-item>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="6">
                   <el-form-item label="内存占用(MB)" required>
                     <el-input type="Number" placeholder="64" v-model.number="problem.extra_config.runtime.memory"></el-input>
                   </el-form-item>
@@ -964,6 +1022,7 @@
           extra_config: {
             format: {
               enable: false,
+              score_type: 1,
               indent_size: 4,
               left_big_para: false,
               comma_space: false,
@@ -971,6 +1030,7 @@
             },
             function: {
               enable: false,
+              score_type: 1,
               black_list: [],
               white_list: [],
               max_statement: 10,
@@ -978,10 +1038,13 @@
             },
             memory: {
               enable: false,
+              score_type: 1,
               white_list: [],
               check_ptr_free: false
             },
             style: {
+              enable: false,
+              score_type: 1,
               global_prefix: '',
               white_list: [],
               func_naming: 0,
@@ -991,6 +1054,7 @@
             },
             runtime: {
               enable: false,
+              score_type: 1,
               time: 100,
               memory: 64
             }
